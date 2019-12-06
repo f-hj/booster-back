@@ -1,0 +1,9 @@
+version: '2'
+
+services:
+  postgres:
+    image: postgres:12
+    volume:
+      - ./volumes/postgres/:/
+    ports:
+      - "2:2"
