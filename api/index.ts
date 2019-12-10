@@ -12,6 +12,9 @@ const createAPI = async (c: Connection) => {
   const passport = new Passport(c)
   passport.use()
 
+  app.use('/specs.json', (req, res) => {
+    res.json(require('../swagger.json'))
+  })
   app.use('/v1', await createAPIv1(c))
 
   return app
