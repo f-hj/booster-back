@@ -1,4 +1,5 @@
 import { ValidationError } from 'class-validator'
+import cors = require('cors')
 import express = require('express')
 import passeport = require('passport')
 import { Connection } from 'typeorm'
@@ -23,6 +24,11 @@ const router = express.Router()
  */
 
 const createAPIv1 = async (c: Connection) => {
+  router.use(cors({
+    origin: [ /[[:alpha:]]*:\/\/localhost:?[[:digit:]]{0,5}/, /booster\.fruitice\.fr$/ ],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }))
+
   router.use(passeport.initialize())
   router.use('/status', new StatusController(c).router())
   router.use('/brands', new BrandController(c).router())
