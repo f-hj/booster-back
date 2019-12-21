@@ -150,6 +150,13 @@ export default class UserController {
  *                   $ref: '#/components/schemas/User'
  *                 token:
  *                   type: string
+ *       401:
+ *         description: Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
   private async loginUser(req: express.Request, res: express.Response, next: express.NextFunction) {
     const user = await this.repo.findOne({

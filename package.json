@@ -6,8 +6,8 @@
   "license": "MIT",
   "scripts": {
     "test": "jest",
-    "buildMappings": "swagger-jsdoc -d swagger.config.js api/v1/controllers/* entities/*",
-    "buildClient": "openapi-generator generate -g typescript-axios -i swagger.json -o oa-ts-axios",
+    "buildMappings": "swagger-jsdoc -d swagger.config.js api/v1/controllers/* api/v1/entities/* entities/*",
+    "buildClient": "openapi-generator generate -g typescript-axios -i swagger.json -o oa-ts-axios --config openapi.config.json",
     "buildAll": "yarn buildMappings; yarn buildClient",
     "count": "cloc . --exclude-dir node_modules,oa-ts-axios"
   },

@@ -2,7 +2,7 @@
  * @swagger
  * components:
  *   schemas:
- *     Error:
+ *     ApiError:
  *       properties:
  *         type:
  *           type: string
@@ -12,7 +12,7 @@
  *           type: string
  */
 
-export default class Error {
+export default class ApiError {
   public type: string
   public property?: string
   public info?: string

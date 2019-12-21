@@ -1,4 +1,4 @@
-import Error from './Error'
+import ApiError from './Error'
 
 /**
  * @swagger
@@ -9,9 +9,9 @@ import Error from './Error'
  *         errors:
  *           type: array
  *           items:
- *             $ref: '#/components/schemas/Error'
+ *             $ref: '#/components/schemas/ApiError'
  */
 
 export default class ErrorResponse {
-  public errors: Error[]
+  public errors: ApiError[]
 }

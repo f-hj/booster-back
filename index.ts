@@ -1,13 +1,27 @@
-import { Connection, createConnection } from 'typeorm'
+import { Connection, ConnectionOptions, createConnection } from 'typeorm'
 import createAPI from './api'
+import config from './config'
 import entities from './entities'
 
-createConnection({
+let connectionConfig: ConnectionOptions = {
   type: 'sqlite',
   database: './sqlite.db',
   entities,
   synchronize: true,
-}).then(async (connection) => {
+}
+
+if (config.postgres.active) {
+  const pg = config.postgres
+
+  connectionConfig = {
+    type: 'postgres',
+    url: `postgres://${pg.user}:${pg.password}@${pg.host}/${pg.database}`,
+    entities,
+    synchronize: true,
+  }
+}
+
+createConnection(connectionConfig).then(async (connection) => {
   const app = await createAPI(connection)
   const server = app.listen(process.env.PORT || 3000, () => {
     console.log('Ready & listening', server.address())

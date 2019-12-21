@@ -66,6 +66,13 @@ export default class BrandController {
  *                 brand:
  *                   type: object
  *                   $ref: '#/components/schemas/Brand'
+ *       400:
+ *         description: Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
   private async createBrand(req: express.Request, res: express.Response, next: express.NextFunction) {
     const brand = this.repo.create(req.body.brand as Brand)

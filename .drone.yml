@@ -20,6 +20,21 @@ steps:
     - yarn buildAll
     - yarn test
 
+- name: push-client
+  image: alpine/git
+  environment:
+    GIT_TOKEN:
+      from_secret: git_token
+  commands:
+    - git config --global user.name "FI Drone CI"
+    - git config --global user.email "fhj.drone@fruitice.fr"
+    - cd oa-ts-axios
+    - sh git_push.sh f-hj booster-js-client
+  when:
+    branch: master
+    event: push
+    status: success
+
 - name: rebuild-cache
   pull: default
   image: drillster/drone-volume-cache
