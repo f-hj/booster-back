@@ -21,7 +21,7 @@ steps:
     - yarn test
 
 - name: push-client
-  image: alpine/git
+  image: node:12
   environment:
     GIT_TOKEN:
       from_secret: git_token
@@ -29,6 +29,9 @@ steps:
     - git config --global user.name "FI Drone CI"
     - git config --global user.email "fhj.drone@fruitice.fr"
     - cd oa-ts-axios
+    - sed -i '/dist/d' ./.gitignore
+    - yarn
+    - yarn build
     - sh git_push.sh f-hj booster-js-client
   when:
     branch: master
