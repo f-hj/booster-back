@@ -72,7 +72,12 @@ test('create login and fetch user', async () => {
   })
   expect(login.data.user.isAdmin).toBe(false)
 
-  const usr = await api.getUser(login.data.user!.id)
+  const loggedApi = new UsersApi({
+    basePath: testhelpers.getBasePath(srv),
+    accessToken: login.data.token,
+  })
+
+  const usr = await loggedApi.getMyself()
   expect(usr.data.user.name).toBe(name)
 })
 

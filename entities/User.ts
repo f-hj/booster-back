@@ -1,16 +1,14 @@
 import bcrypt = require('bcrypt')
 import { IsEmail, MinLength } from 'class-validator'
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, PrimaryGeneratedColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm'
+import AccessToken from './AccessToken'
+import Brand from './Brand'
 
 /**
  * @swagger
  * components:
  *   schemas:
  *     User:
- *       required:
- *         - name
- *         - password
- *         - email
  *       properties:
  *         id:
  *           type: string
@@ -22,6 +20,10 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
  *           type: string
  *         isAdmin:
  *           type: boolean
+ *         brands:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Brand'
  */
 @Entity()
 export default class User {
@@ -50,6 +52,9 @@ export default class User {
   })
   public isAdmin: boolean
 
+  @ManyToMany((type) => Brand, (brand) => brand.users)
+  public brands: Brand[]
+
   public async generatePassword() {
     this.salt = await bcrypt.genSalt(10)
     this.password = await bcrypt.hash(this.password, this.salt)
@@ -61,6 +66,7 @@ export default class User {
       name: this.name,
       email: this.email,
       isAdmin: this.isAdmin,
+      brands: this.brands,
     }
   }
 }

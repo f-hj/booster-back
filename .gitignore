@@ -6,3 +6,4 @@ sqlite.db
 swagger.json
 yarn-error.log
 oa-ts-axios
+coverage

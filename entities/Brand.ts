@@ -1,5 +1,5 @@
 import { MinLength } from 'class-validator'
-import {Column, Entity, OneToMany, PrimaryGeneratedColumn} from 'typeorm'
+import {Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn, JoinTable} from 'typeorm'
 import User from './User'
 
 /**
@@ -31,7 +31,8 @@ export default class Brand {
   })
   public name: string
 
-  @OneToMany(() => User, (user) => user.id)
+  @ManyToMany((type) => User, (user) => user.brands)
+  @JoinTable()
   public users: User[]
 
   @Column({

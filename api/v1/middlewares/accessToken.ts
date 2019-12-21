@@ -20,8 +20,10 @@ const checkAccessToken = (c: Connection) => {
     }
 
     const t = a.replace('Bearer ', '')
-    const at = await atRepo.findOne({
+    const at = await atRepo.findOneOrFail({
       accessToken: t,
+    }, {
+      relations: ['user'],
     })
 
     req.context = {
@@ -43,9 +45,12 @@ const onlyAdmin = () => {
         ],
       } as ErrorResponse)
     }
+
+    next()
   }
 }
 
 export default {
   checkAccessToken,
+  onlyAdmin,
 }

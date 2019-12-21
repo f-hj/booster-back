@@ -7,6 +7,7 @@ import { Connection, Repository } from 'typeorm'
 import config from '../../../config'
 import AccessToken from '../../../entities/AccessToken'
 import User from '../../../entities/User'
+import atMw from '../middlewares/accessToken'
 
 export default class UserController {
 
@@ -23,7 +24,10 @@ export default class UserController {
   public router() {
     const router = express.Router({ mergeParams: true })
 
-    router.get('/:userId', this.getUser.bind(this))
+    const chAT = atMw.checkAccessToken(this.c)
+
+    router.get('/user/:userId', chAT, atMw.onlyAdmin(), this.getUser.bind(this))
+    router.get('/me', chAT, this.getMyself.bind(this))
     router.post('/', this.createUser.bind(this))
     router.post('/login', this.loginUser.bind(this))
 
@@ -85,10 +89,12 @@ export default class UserController {
 
 /**
  * @swagger
- * /v1/users/{userId}:
+ * /v1/users/user/{userId}:
  *   get:
  *     summary: Get an user
  *     operationId: getUser
+ *     security:
+ *       - bearerAuth: []
  *     tags:
  *       - Users
  *     parameters:
@@ -113,6 +119,39 @@ export default class UserController {
   private async getUser(req: express.Request, res: express.Response) {
     const user = await this.repo.findOneOrFail({
       id: req.params.userId,
+    })
+    res.json({
+      user,
+    })
+  }
+
+/**
+ * @swagger
+ * /v1/users/me:
+ *   get:
+ *     summary: Get current logged user
+ *     operationId: getMyself
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                   $ref: '#/components/schemas/User'
+ */
+  private async getMyself(req: express.Request, res: express.Response) {
+    const user = await this.repo.findOneOrFail({
+      id: req.context.user.id,
+    }, {
+      relations: ['brands'],
     })
     res.json({
       user,
