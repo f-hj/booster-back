@@ -32,6 +32,8 @@ steps:
     - sed -i '/dist/d' ./.gitignore
     - yarn
     - yarn build
+    - rm git_push.sh
+    - cp ../scripts/git_push.sh .
     - sh git_push.sh f-hj booster-js-client
   when:
     branch: master
