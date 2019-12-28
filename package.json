@@ -5,6 +5,7 @@
   "author": "Florian Hermouet-Joscht <hello@florianhj.fr>",
   "license": "MIT",
   "scripts": {
+    "start": "ts-node index.ts",
     "test": "jest",
     "buildMappings": "swagger-jsdoc -d swagger.config.js api/v1/controllers/* api/v1/entities/* entities/*",
     "buildClient": "openapi-generator generate -g typescript-axios -i swagger.json -o oa-ts-axios --config openapi.config.json",
@@ -17,7 +18,7 @@
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.2",
     "@types/faker": "^4.1.8",
-    "@types/jest": "^24.0.23",
+    "@types/jest": "^24.0.24",
     "@types/jsonwebtoken": "^8.3.5",
     "@types/node": "^12.12.14",
     "@types/passport": "^1.0.2",
@@ -26,6 +27,7 @@
     "sqlite3": "^4.1.0",
     "swagger-jsdoc": "^3.4.0",
     "ts-jest": "^24.2.0",
+    "ts-node": "^8.5.4",
     "tslint": "^5.20.1",
     "typescript": "^3.7.2"
   },

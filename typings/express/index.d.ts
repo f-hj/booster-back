@@ -1,5 +1,5 @@
 import { Request } from "express"
-import User from "../entities/User"
+import User from "../../entities/User"
 
 interface IContext {
   user: User
@@ -7,6 +7,6 @@ interface IContext {
 
 declare module "express" { 
   export interface Request {
-    context: IContext
+    context?: IContext
   }
 }

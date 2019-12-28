@@ -23,7 +23,7 @@ const checkAccessToken = (c: Connection) => {
     const at = await atRepo.findOneOrFail({
       accessToken: t,
     }, {
-      relations: ['user'],
+      relations: ['user', 'user.brands'],
     })
 
     req.context = {

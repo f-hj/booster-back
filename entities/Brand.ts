@@ -1,5 +1,5 @@
 import { MinLength } from 'class-validator'
-import {Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn, JoinTable} from 'typeorm'
+import {Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn} from 'typeorm'
 import User from './User'
 
 /**

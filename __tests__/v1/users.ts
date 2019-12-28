@@ -29,8 +29,37 @@ test('createUser OK', async () => {
     },
   })
 
-  expect(res.data.user.email).toBe(email)
-  expect(res.data.user.password).toBe(undefined)
+  const user = res.data.user
+
+  expect(user.email).toBe(email)
+  expect(user.password).toBe(undefined)
+
+  // try to find in listUser func
+  const r = await testhelpers.createLoginAdmin(testhelpers.getBasePath(srv))
+  const userAdminApi = new UsersApi({
+    basePath: testhelpers.getBasePath(srv),
+    accessToken: r.token,
+  })
+
+  const rusrs = await userAdminApi.listUsers()
+  let found = false
+  for (const u of rusrs.data.users) {
+    if (u.id === user.id) {
+      found = true
+      break
+    }
+  }
+
+  const usr = await userAdminApi.getUser(user.id)
+  expect(usr.data.user.id).toBe(user.id)
+
+  expect(usr.data.logs).toHaveLength(1)
+
+  const log = usr.data.logs[0]
+  expect(log.action).toBe('create')
+  expect(log.refType).toBe('user')
+
+  expect(found).toBe(true)
 })
 
 test('createUser without email must fail', async (done) => {

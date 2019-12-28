@@ -2,6 +2,7 @@ import { validateOrReject } from 'class-validator'
 import express = require('express')
 import { Connection, Repository } from 'typeorm'
 import Brand from '../../../entities/Brand'
+import Log, { Action, RefType } from '../../../entities/Log'
 import atMw from '../middlewares/accessToken'
 
 /**
@@ -15,10 +16,12 @@ export default class BrandController {
 
   private c: Connection
   private repo: Repository<Brand>
+  private logRepo: Repository<Log>
 
   constructor(c: Connection) {
     this.c = c
     this.repo = c.getRepository(Brand)
+    this.logRepo = c.getRepository(Log)
   }
 
   public router() {
@@ -29,6 +32,7 @@ export default class BrandController {
     router.get('/brands', this.listBrands.bind(this))
     router.post('/brand', chAT, atMw.onlyAdmin(), this.createBrand.bind(this))
     router.get('/brand/:brandId', this.getBrand.bind(this))
+    router.get('/brandLogs/:brandId', chAT, this.getBrandLogs.bind(this))
     router.patch('/brand/:brandId', chAT, this.updateBrand.bind(this))
     router.delete('/brand/:brandId', chAT, this.deleteBrand.bind(this))
     router.get('/myBrands', chAT, this.listMyBrands.bind(this))
@@ -67,7 +71,9 @@ export default class BrandController {
  *               $ref: '#/components/schemas/ErrorResponse'
  */
   private async listBrands(req: express.Request, res: express.Response) {
-    const brands = await this.repo.find()
+    const brands = await this.repo.find({
+      relations: ['users'],
+    })
     return res.json({
       brands,
     })
@@ -132,6 +138,15 @@ export default class BrandController {
       success: true,
       brand: brand.JSON(),
     })
+
+    const log = this.logRepo.create({
+      action: Action.create,
+      refType: RefType.brand,
+      refId: brand.id,
+      user: req.context?.user,
+      to: brand,
+    } as Log)
+    await this.logRepo.save(log)
   }
 
 /**
@@ -157,20 +172,71 @@ export default class BrandController {
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
  *                 brand:
  *                   type: object
  *                   $ref: '#/components/schemas/Brand'
  */
   private async getBrand(req: express.Request, res: express.Response) {
-    const brand = this.repo.find({
+    const brand = await this.repo.findOne({
       id: req.params.brandId,
     })
+
     res.json({
       brand,
     })
   }
+
+/**
+ * @swagger
+ * /v1/brands/brandLogs/{brandId}:
+ *   get:
+ *     summary: Get a brand with logs
+ *     operationId: getBrandLogs
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Brands
+ *     parameters:
+ *       - in: path
+ *         name: brandId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Brand ID
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 brand:
+ *                   type: object
+ *                   $ref: '#/components/schemas/Brand'
+ *                 logs:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Log'
+ */
+private async getBrandLogs(req: express.Request, res: express.Response) {
+  const brand = await this.repo.findOne({
+    id: req.params.brandId,
+  })
+
+  const logs = await this.logRepo.find({
+    where: {
+      refType: RefType.brand,
+      refId: brand.id,
+    },
+    relations: ['user'],
+  })
+
+  res.json({
+    brand,
+    logs,
+  })
+}
 
 /**
  * @swagger
@@ -222,6 +288,15 @@ export default class BrandController {
       success: true,
       brand,
     })
+
+    const log = this.logRepo.create({
+      action: Action.update,
+      refType: RefType.brand,
+      refId: brand.id,
+      user: req.context?.user,
+      to: brand.JSON(),
+    } as Log)
+    await this.logRepo.save(log)
   }
 
 /**
@@ -291,7 +366,6 @@ export default class BrandController {
  *               $ref: '#/components/schemas/ErrorResponse'
  */
   private async listMyBrands(req: express.Request, res: express.Response) {
-    console.log('userid', req.context.user.id)
     const brands = await this.repo
       .createQueryBuilder('brand')
       .leftJoinAndSelect('brand.users', 'user')

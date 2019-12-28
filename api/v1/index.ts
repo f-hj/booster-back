@@ -49,6 +49,7 @@ const createAPIv1 = async (c: Connection) => {
 
     }
 
+    console.log('Errors:', err)
     return res.status(500).json({
       errors: [err],
     })

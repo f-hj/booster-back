@@ -6,6 +6,7 @@ import passport = require('passport')
 import { Connection, Repository } from 'typeorm'
 import config from '../../../config'
 import AccessToken from '../../../entities/AccessToken'
+import Log, { Action, RefType } from '../../../entities/Log'
 import User from '../../../entities/User'
 import atMw from '../middlewares/accessToken'
 
@@ -13,11 +14,13 @@ export default class UserController {
 
   private c: Connection
   private repo: Repository<User>
+  private logRepo: Repository<Log>
   private acRepo: Repository<AccessToken>
 
   constructor(c: Connection) {
     this.c = c
     this.repo = c.getRepository(User)
+    this.logRepo = c.getRepository(Log)
     this.acRepo = c.getRepository(AccessToken)
   }
 
@@ -27,6 +30,7 @@ export default class UserController {
     const chAT = atMw.checkAccessToken(this.c)
 
     router.get('/user/:userId', chAT, atMw.onlyAdmin(), this.getUser.bind(this))
+    router.get('/users', chAT, atMw.onlyAdmin(), this.listUsers.bind(this))
     router.get('/me', chAT, this.getMyself.bind(this))
     router.post('/', this.createUser.bind(this))
     router.post('/login', this.loginUser.bind(this))
@@ -67,13 +71,16 @@ export default class UserController {
  */
   private async createUser(req: express.Request, res: express.Response, next: express.NextFunction) {
     const user = this.repo.create(req.body.user as User)
+
+    // TODO: check if user exists
+
     try {
       await validateOrReject(user)
     } catch (e) {
       return next(e)
     }
 
-    await user.generatePassword()
+    await user.hashPassword()
 
     try {
       await this.repo.save(user)
@@ -85,7 +92,55 @@ export default class UserController {
       success: true,
       user: user.JSON(),
     })
+
+    const log = this.logRepo.create({
+      action: Action.create,
+      refType: RefType.user,
+      refId: user.id,
+      user: req.context?.user,
+      to: user.JSON(),
+    } as Log)
+    await this.logRepo.save(log)
   }
+
+/**
+ * @swagger
+ * /v1/users/users:
+ *   get:
+ *     summary: List all users
+ *     operationId: listUsers
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 users:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+private async listUsers(req: express.Request, res: express.Response) {
+  const users = await this.repo.find({
+    relations: ['brands'],
+  })
+  return res.json({
+    users,
+  })
+}
 
 /**
  * @swagger
@@ -115,13 +170,29 @@ export default class UserController {
  *                 user:
  *                   type: object
  *                   $ref: '#/components/schemas/User'
+ *                 logs:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Log'
  */
   private async getUser(req: express.Request, res: express.Response) {
     const user = await this.repo.findOneOrFail({
       id: req.params.userId,
+    }, {
+      relations: ['brands'],
     })
+
+    const logs = await this.logRepo.find({
+      where: {
+        refType: RefType.user,
+        refId: user.id,
+      },
+      relations: ['user'],
+    })
+
     res.json({
       user,
+      logs,
     })
   }
 
@@ -199,7 +270,11 @@ export default class UserController {
  */
   private async loginUser(req: express.Request, res: express.Response, next: express.NextFunction) {
     const user = await this.repo.findOne({
-      email: req.body.email,
+      where: {
+        email: req.body.email,
+      },
+      select: ['password', 'id', 'salt', 'name', 'email', 'isAdmin'],
+      relations: ['brands'],
     })
     if (!user) {
       return res.status(401).json({

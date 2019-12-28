@@ -32,6 +32,13 @@ test('should create brand', async () => {
   const brand = res.data.brand!
   expect(brand.name).toBe(brandName)
 
+  const abrands = await api.getBrandLogs(brand.id)
+  expect(abrands.data.logs).toHaveLength(1)
+
+  const log = abrands.data.logs[0]
+  expect(log.user.id).toBe(admin.user.id)
+  expect(log.action).toBe('create')
+
   // list all public brands
   const rb = await api.listBrands()
   expect(rb.data.brands).toHaveLength(1)
@@ -61,6 +68,13 @@ test('should create brand', async () => {
     },
   })
   expect(bures.data.success).toBe(true)
+
+  const abrands2 = await api.getBrandLogs(brand.id)
+  expect(abrands2.data.logs).toHaveLength(2)
+
+  const log2 = abrands2.data.logs[1]
+  expect(log2.user.id).toBe(admin.user.id)
+  expect(log2.action).toBe('update')
 
   // list my personnal brands
   const mb2 = await api.listMyBrands()

@@ -13,7 +13,7 @@ const createAPI = async (c: Connection) => {
   passport.use()
 
   app.use((req, res, next) => {
-    console.log('New request', req.method, req.path)
+    console.log('Req:', req.method, req.path)
     next()
   })
 
