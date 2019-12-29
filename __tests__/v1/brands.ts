@@ -177,4 +177,34 @@ test('should create brand and invite user that doesnt exists', async () => {
 
   const brand = res.data.brand!
   expect(brand.name).toBe(brandName)
+
+  const inv = await api.inviteUser(brand.id, {
+    email: faker.internet.email(),
+  })
+
+  expect(inv.data.message).toBe('onboarding sent')
+})
+
+test('should create brand and invite user who already signed up', async () => {
+  const admin = await testhelpers.createLoginAdmin(testhelpers.getBasePath(srv))
+  const api = new BrandsApi({
+    accessToken: admin.token,
+  }, testhelpers.getBasePath(srv))
+  const brandName = faker.company.companyName()
+
+  // create a brand
+  const res = await api.createBrand({
+    brand: {
+      name: brandName,
+    },
+  })
+
+  const brand = res.data.brand!
+  expect(brand.name).toBe(brandName)
+
+  const inv = await api.inviteUser(brand.id, {
+    email: admin.user.email,
+  })
+
+  expect(inv.data.message).toBe('user added')
 })

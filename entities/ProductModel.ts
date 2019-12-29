@@ -1,8 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm'
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import Product from './Product'
 
 @Entity()
-export default class {
+export default class ProductModel {
   @PrimaryGeneratedColumn('uuid')
   public id: string
 

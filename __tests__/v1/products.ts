@@ -24,7 +24,7 @@ test('shouldnt create product if brand doesnt exists', async () => {
   try {
     await api.createProduct({})
   } catch (e) {
-    console.log(e)
+    expect(e.response.data.errors).toHaveLength(1)
   }
 })
 

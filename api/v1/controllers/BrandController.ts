@@ -305,6 +305,49 @@ private async getBrandLogs(req: express.Request, res: express.Response) {
     await this.logRepo.save(log)
   }
 
+/**
+ * @swagger
+ * /v1/brands/brand/{brandId}/inviteUser:
+ *   post:
+ *     summary: Invite a user to a brand
+ *     operationId: inviteUser
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Brands
+ *     parameters:
+ *       - in: path
+ *         name: brandId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Brand ID
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 brand:
+ *                   type: object
+ *                   $ref: '#/components/schemas/Brand'
+ *                 message:
+ *                   type: string
+ *                 info:
+ *                   type: string
+ *                 onboardingId:
+ *                   type: string
+ */
   private async inviteUser(req: express.Request, res: express.Response) {
     const user = await this.userRepo.findOne({
       email: req.body.email,
@@ -312,15 +355,12 @@ private async getBrandLogs(req: express.Request, res: express.Response) {
 
     const brand = await this.repo.findOneOrFail({
       id: req.params.brandId,
-      users: [req.context.user],
     })
 
     if (!user) {
       const onb = this.onbUserRepo.create({
         email: req.body.email,
-        brand: {
-          id: req.params.brandId,
-        },
+        brand,
       } as OnboardingUser)
       await this.onbUserRepo.save(onb)
 
@@ -339,6 +379,8 @@ private async getBrandLogs(req: express.Request, res: express.Response) {
       res.json({
         message: 'onboarding sent',
         info: 'The invitation is sent, your user will fill a form with some infos',
+        brand,
+        onboardingId: onb.id,
       })
 
       return
@@ -351,7 +393,13 @@ private async getBrandLogs(req: express.Request, res: express.Response) {
       user: req.context?.user,
       from: brand,
     } as Log)
-    brand.users.push(user)
+
+    // TODO: bha, js...
+    if (!brand.users) {
+      brand.users = [user]
+    } else {
+      brand.users.push(user)
+    }
 
     await this.repo.save(brand)
     log.to = brand
@@ -361,6 +409,7 @@ private async getBrandLogs(req: express.Request, res: express.Response) {
     res.json({
       message: 'user added',
       info: 'The user have now access to your brand',
+      brand,
     })
   }
 
