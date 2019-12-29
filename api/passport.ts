@@ -1,7 +1,6 @@
 import bcrypt = require('bcrypt')
 import passport = require('passport')
-import { Strategy as JWTStrategy } from 'passport-jwt'
-import { ExtractJWT, Strategy as LocalStrategy } from 'passport-local'
+import { Strategy as LocalStrategy } from 'passport-local'
 import { Connection, Repository } from 'typeorm'
 import User from '../entities/User'
 

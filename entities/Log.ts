@@ -10,6 +10,8 @@ export enum Action {
 export enum RefType {
   user = 'user',
   brand = 'brand',
+  product = 'product',
+  onboardingUser = 'onboardingUser',
 }
 
 /**

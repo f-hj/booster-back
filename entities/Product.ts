@@ -1,5 +1,6 @@
-import {Column, Entity, ManyToOne, PrimaryGeneratedColumn} from 'typeorm'
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import Brand from './Brand'
+import ProductModel from './ProductModel'
 import User from './User'
 
 /**
@@ -8,7 +9,6 @@ import User from './User'
  *   schemas:
  *     Product:
  *       required:
- *         - brand
  *         - name
  *         - description
  *         - currency
@@ -48,5 +48,8 @@ export default class Product {
 
   @Column()
   public price: number
+
+  @OneToMany((type) => ProductModel, (pm) => pm.product)
+  public models: ProductModel[]
 
 }

@@ -15,10 +15,14 @@ steps:
 
 - name: test
   image: timbru31/java-node:latest
+  environment:
+    CODACY_PROJECT_TOKEN:
+      from_secret: codacy_project_token
   commands:
     - yarn install
     - yarn buildAll
     - yarn test
+    - yarn pushCoverage
 
 - name: push-client
   image: node:12

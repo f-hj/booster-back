@@ -34,6 +34,41 @@ const checkAccessToken = (c: Connection) => {
   }
 }
 
+const accessToBrand = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (!req.params.brandId) {
+    return next(new Error("Access to a brand without a 'brandId' param is not possible"))
+  }
+
+  if (!req.context?.user) {
+    return next(new Error('Access to a brand without checking the access token first is not possible'))
+  }
+
+  if (req.context.user.isAdmin) {
+    return next()
+  }
+
+  let accessible = false
+  for (const brand of req.context.user.brands) {
+    if (brand.id === req.params.id) {
+      accessible = true
+      break
+    }
+  }
+
+  if (!accessible) {
+    return res.status(402).json({
+      errors: [
+        {
+          type: 'acl',
+          info: "You don't have access to this brand",
+        },
+      ],
+    })
+  }
+
+  return next()
+}
+
 const onlyAdmin = () => {
   return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (!req.context.user.isAdmin) {
@@ -53,4 +88,5 @@ const onlyAdmin = () => {
 export default {
   checkAccessToken,
   onlyAdmin,
+  accessToBrand,
 }

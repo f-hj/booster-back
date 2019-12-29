@@ -4,6 +4,7 @@ import express = require('express')
 import passeport = require('passport')
 import { Connection } from 'typeorm'
 import BrandController from './controllers/BrandController'
+import ProductController from './controllers/ProductController'
 import StatusController from './controllers/StatusController'
 import UserController from './controllers/UserController'
 
@@ -33,6 +34,7 @@ const createAPIv1 = async (c: Connection) => {
   router.use('/status', new StatusController(c).router())
   router.use('/brands', new BrandController(c).router())
   router.use('/users', new UserController(c).router())
+  router.use('/products', new ProductController(c).router())
   router.use((err: express.Errback, req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (Array.isArray(err)) {
 
@@ -42,6 +44,7 @@ const createAPIv1 = async (c: Connection) => {
             return {
               type: 'validation',
               property: e.property,
+              info: `The field ${e.property} is invalid`,
             }
           }),
         })
@@ -51,7 +54,11 @@ const createAPIv1 = async (c: Connection) => {
 
     console.log('Errors:', err)
     return res.status(500).json({
-      errors: [err],
+      errors: [{
+        type: 'internal',
+        property: err.name,
+        info: 'This is an internal error, please try again later',
+      }],
     })
   })
 

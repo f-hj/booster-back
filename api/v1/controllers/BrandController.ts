@@ -3,6 +3,8 @@ import express = require('express')
 import { Connection, Repository } from 'typeorm'
 import Brand from '../../../entities/Brand'
 import Log, { Action, RefType } from '../../../entities/Log'
+import OnboardingUser from '../../../entities/OnboardingUser'
+import User from '../../../entities/User'
 import atMw from '../middlewares/accessToken'
 
 /**
@@ -16,11 +18,15 @@ export default class BrandController {
 
   private c: Connection
   private repo: Repository<Brand>
+  private userRepo: Repository<User>
+  private onbUserRepo: Repository<OnboardingUser>
   private logRepo: Repository<Log>
 
   constructor(c: Connection) {
     this.c = c
     this.repo = c.getRepository(Brand)
+    this.userRepo = c.getRepository(User)
+    this.onbUserRepo = c.getRepository(OnboardingUser)
     this.logRepo = c.getRepository(Log)
   }
 
@@ -32,9 +38,10 @@ export default class BrandController {
     router.get('/brands', this.listBrands.bind(this))
     router.post('/brand', chAT, atMw.onlyAdmin(), this.createBrand.bind(this))
     router.get('/brand/:brandId', this.getBrand.bind(this))
-    router.get('/brandLogs/:brandId', chAT, this.getBrandLogs.bind(this))
-    router.patch('/brand/:brandId', chAT, this.updateBrand.bind(this))
-    router.delete('/brand/:brandId', chAT, this.deleteBrand.bind(this))
+    router.get('/brandLogs/:brandId', chAT, atMw.accessToBrand, this.getBrandLogs.bind(this))
+    router.patch('/brand/:brandId', chAT, atMw.accessToBrand, this.updateBrand.bind(this))
+    router.post('/brand/:brandId/inviteUser', chAT, atMw.accessToBrand, this.inviteUser.bind(this))
+    router.delete('/brand/:brandId', chAT, atMw.accessToBrand, this.deleteBrand.bind(this))
     router.get('/myBrands', chAT, this.listMyBrands.bind(this))
 
     return router
@@ -279,7 +286,6 @@ private async getBrandLogs(req: express.Request, res: express.Response) {
  *                   $ref: '#/components/schemas/Brand'
  */
   private async updateBrand(req: express.Request, res: express.Response) {
-    // TODO: if user not admin check if brand owner
     const brand = this.repo.create(req.body.brand as Brand)
     brand.id = req.params.brandId
 
@@ -297,6 +303,65 @@ private async getBrandLogs(req: express.Request, res: express.Response) {
       to: brand.JSON(),
     } as Log)
     await this.logRepo.save(log)
+  }
+
+  private async inviteUser(req: express.Request, res: express.Response) {
+    const user = await this.userRepo.findOne({
+      email: req.body.email,
+    })
+
+    const brand = await this.repo.findOneOrFail({
+      id: req.params.brandId,
+      users: [req.context.user],
+    })
+
+    if (!user) {
+      const onb = this.onbUserRepo.create({
+        email: req.body.email,
+        brand: {
+          id: req.params.brandId,
+        },
+      } as OnboardingUser)
+      await this.onbUserRepo.save(onb)
+
+      // TODO: send mail to user with invite link
+      console.log('ONBOARDING USER: ' + onb.id)
+
+      const log = this.logRepo.create({
+        action: Action.create,
+        refType: RefType.onboardingUser,
+        refId: onb.id,
+        user: req.context?.user,
+        to: onb,
+      } as Log)
+      await this.logRepo.save(log)
+
+      res.json({
+        message: 'onboarding sent',
+        info: 'The invitation is sent, your user will fill a form with some infos',
+      })
+
+      return
+    }
+
+    const log = this.logRepo.create({
+      action: Action.update,
+      refType: RefType.brand,
+      refId: brand.id,
+      user: req.context?.user,
+      from: brand,
+    } as Log)
+    brand.users.push(user)
+
+    await this.repo.save(brand)
+    log.to = brand
+
+    await this.logRepo.save(log)
+
+    res.json({
+      message: 'user added',
+      info: 'The user have now access to your brand',
+    })
   }
 
 /**
@@ -328,7 +393,6 @@ private async getBrandLogs(req: express.Request, res: express.Response) {
  *                   type: boolean
  */
   private async deleteBrand(req: express.Request, res: express.Response) {
-    // TODO: if user not admin check if brand owner
     await this.repo.delete(req.params.brandId)
     res.json({
       success: true,

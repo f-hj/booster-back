@@ -26,9 +26,6 @@ import Brand from './Brand'
  *             $ref: '#/components/schemas/Brand'
  *         createdAt:
  *           type: string
- *         createdBy:
- *           type: object
- *           $ref: '#/components/schemas/Brand'
  */
 @Entity()
 export default class User {
@@ -77,5 +74,17 @@ export default class User {
       isAdmin: this.isAdmin,
       brands: this.brands,
     }
+  }
+
+  public canAccessBrandId(id: string) {
+    let accessible = false
+    for (const brand of this.brands) {
+      if (brand.id === id) {
+        accessible = true
+        break
+      }
+    }
+
+    return accessible
   }
 }
