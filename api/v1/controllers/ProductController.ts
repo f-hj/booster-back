@@ -30,6 +30,7 @@ export default class ProductController {
     const chAT = atMw.checkAccessToken(this.c)
 
     router.get('/product/:productId', this.getProduct.bind(this))
+    router.get('/productLogs/:productId', chAT, this.getProductLogs.bind(this))
     router.get('/brand/:brandId', this.listBrandProducts.bind(this))
     router.post('/product', chAT, this.createProduct.bind(this))
     router.patch('/product/:productId', chAT, this.updateProduct.bind(this))
@@ -67,12 +68,68 @@ export default class ProductController {
   private async getProduct(req: express.Request, res: express.Response) {
     const product = await this.repo.findOne({
       id: req.params.productId,
+    }, {
+      relations: ['brand', 'models'],
     })
 
     res.json({
       product,
     })
   }
+
+/**
+ * @swagger
+ * /v1/products/productLogs/${productId}:
+ *   get:
+ *     summary: Get current product with logs
+ *     operationId: getProductLogs
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Products
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Product ID
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 product:
+ *                   type: object
+ *                   $ref: '#/components/schemas/Product'
+ *                 logs:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Log'
+ */
+private async getProductLogs(req: express.Request, res: express.Response) {
+  const product = await this.repo.findOne({
+    id: req.params.productId,
+  }, {
+    relations: ['brand', 'models'],
+  })
+
+  const logs = await this.logRepo.find({
+    where: {
+      refType: RefType.product,
+      refId: product.id,
+    },
+    relations: ['user'],
+  })
+
+  res.json({
+    product,
+    logs,
+  })
+}
 
 /**
  * @swagger

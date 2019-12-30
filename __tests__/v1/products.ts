@@ -88,6 +88,16 @@ test('shoudld create a product for a brand', async () => {
   expect(p.data.product.name).toBe(productName)
   expect(p.data.product.description).toBe(productDescription)
 
+  const getp = await api.getProduct(p.data.product.id)
+  expect(getp.data.product.id).toBe(p.data.product.id)
+  expect(getp.data.product.brand.id).toBe(brand.id)
+
+  const getpl = await api.getProductLogs(p.data.product.id)
+  expect(getpl.data.product.id).toBe(p.data.product.id)
+  expect(getpl.data.product.brand.id).toBe(brand.id)
+  expect(getpl.data.logs).toHaveLength(1)
+  expect(getpl.data.logs[0].action).toBe('create')
+
   const ps = await api.listBrandProducts(brand.id)
   expect(ps.data.products).toHaveLength(1)
 })

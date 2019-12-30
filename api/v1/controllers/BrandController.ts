@@ -228,7 +228,10 @@ export default class BrandController {
  */
 private async getBrandLogs(req: express.Request, res: express.Response) {
   const brand = await this.repo.findOne({
-    id: req.params.brandId,
+    where: {
+      id: req.params.brandId,
+    },
+    relations: ['users'],
   })
 
   const logs = await this.logRepo.find({
