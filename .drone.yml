@@ -27,7 +27,7 @@ steps:
   commands:
     - yarn install
     - yarn buildAll
-    - yarn test
+    - npx jest --maxWorkers 1
     - yarn pushCoverage
 
 - name: push-client
