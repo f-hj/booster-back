@@ -1,6 +1,7 @@
 import { ValidationError } from 'class-validator'
 import cors = require('cors')
 import express = require('express')
+import os = require('os')
 import passeport = require('passport')
 import { Connection } from 'typeorm'
 import BrandController from './controllers/BrandController'
@@ -31,6 +32,11 @@ const createAPIv1 = async (c: Connection) => {
   }))
 
   router.use(passeport.initialize())
+  router.use((req, res, next) => {
+    res.set('X-Booster-Instance', os.hostname())
+    res.set('X-Booster-Version', process.env.BOOSTER_VERSION || 'na')
+    next()
+  })
 
   router.use('/status', new StatusController(c).router())
   router.use('/brands', new BrandController(c).router())

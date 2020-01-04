@@ -5,7 +5,9 @@ import Passport from './passport'
 import createAPIv1 from './v1'
 
 const app = express()
-app.use(bodyParser.json())
+app.use(bodyParser.json({
+  limit: '50Mb',
+}))
 
 const createAPI = async (c: Connection) => {
 
