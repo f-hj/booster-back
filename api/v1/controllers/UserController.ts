@@ -53,7 +53,6 @@ export default class UserController {
  *             type: object
  *             properties:
  *               user:
- *                 type: object
  *                 $ref: '#/components/schemas/User'
  *     responses:
  *       200:
@@ -66,7 +65,6 @@ export default class UserController {
  *                 success:
  *                   type: boolean
  *                 user:
- *                   type: object
  *                   $ref: '#/components/schemas/User'
  */
   private async createUser(req: express.Request, res: express.Response, next: express.NextFunction) {
@@ -130,7 +128,6 @@ export default class UserController {
  *         content:
  *           application/json:
  *             schema:
- *               type: object
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 private async listUsers(req: express.Request, res: express.Response) {
@@ -168,7 +165,6 @@ private async listUsers(req: express.Request, res: express.Response) {
  *               type: object
  *               properties:
  *                 user:
- *                   type: object
  *                   $ref: '#/components/schemas/User'
  *                 logs:
  *                   type: array
@@ -215,7 +211,6 @@ private async listUsers(req: express.Request, res: express.Response) {
  *               type: object
  *               properties:
  *                 user:
- *                   type: object
  *                   $ref: '#/components/schemas/User'
  */
   private async getMyself(req: express.Request, res: express.Response) {
@@ -256,7 +251,6 @@ private async listUsers(req: express.Request, res: express.Response) {
  *               type: object
  *               properties:
  *                 user:
- *                   type: object
  *                   $ref: '#/components/schemas/User'
  *                 token:
  *                   type: string
@@ -265,7 +259,6 @@ private async listUsers(req: express.Request, res: express.Response) {
  *         content:
  *           application/json:
  *             schema:
- *               type: object
  *               $ref: '#/components/schemas/ErrorResponse'
  */
   private async loginUser(req: express.Request, res: express.Response, next: express.NextFunction) {

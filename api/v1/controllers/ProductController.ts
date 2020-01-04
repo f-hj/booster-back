@@ -62,14 +62,13 @@ export default class ProductController {
  *               type: object
  *               properties:
  *                 product:
- *                   type: object
  *                   $ref: '#/components/schemas/Product'
  */
   private async getProduct(req: express.Request, res: express.Response) {
     const product = await this.repo.findOne({
       id: req.params.productId,
     }, {
-      relations: ['brand', 'models'],
+      relations: ['brand', 'models', 'images'],
     })
 
     res.json({
@@ -103,7 +102,6 @@ export default class ProductController {
  *               type: object
  *               properties:
  *                 product:
- *                   type: object
  *                   $ref: '#/components/schemas/Product'
  *                 logs:
  *                   type: array
@@ -188,7 +186,6 @@ private async getProductLogs(req: express.Request, res: express.Response) {
  *             type: object
  *             properties:
  *               product:
- *                 type: object
  *                 $ref: '#/components/schemas/Product'
  *     responses:
  *       200:
@@ -199,14 +196,12 @@ private async getProductLogs(req: express.Request, res: express.Response) {
  *               type: object
  *               properties:
  *                 product:
- *                   type: object
  *                   $ref: '#/components/schemas/Product'
  *       400:
  *         description: Error
  *         content:
  *           application/json:
  *             schema:
- *               type: object
  *               $ref: '#/components/schemas/ErrorResponse'
  */
   private async createProduct(req: express.Request, res: express.Response, next: express.NextFunction) {
@@ -266,7 +261,6 @@ private async getProductLogs(req: express.Request, res: express.Response) {
  *             type: object
  *             properties:
  *               product:
- *                 type: object
  *                 $ref: '#/components/schemas/Product'
  *     responses:
  *       200:
@@ -279,7 +273,6 @@ private async getProductLogs(req: express.Request, res: express.Response) {
  *                 success:
  *                   type: boolean
  *                 brand:
- *                   type: object
  *                   $ref: '#/components/schemas/Brand'
  */
 private async updateProduct(req: express.Request, res: express.Response) {

@@ -4,6 +4,7 @@ import express = require('express')
 import passeport = require('passport')
 import { Connection } from 'typeorm'
 import BrandController from './controllers/BrandController'
+import ImagesController from './controllers/ImageController'
 import ProductController from './controllers/ProductController'
 import StatusController from './controllers/StatusController'
 import UserController from './controllers/UserController'
@@ -20,7 +21,6 @@ const router = express.Router()
  *         content:
  *           application/json:
  *             schema:
- *               type: object
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 
@@ -31,10 +31,13 @@ const createAPIv1 = async (c: Connection) => {
   }))
 
   router.use(passeport.initialize())
+
   router.use('/status', new StatusController(c).router())
   router.use('/brands', new BrandController(c).router())
   router.use('/users', new UserController(c).router())
   router.use('/products', new ProductController(c).router())
+  router.use('/images', new ImagesController(c).router())
+
   router.use((err: express.Errback, req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (Array.isArray(err)) {
 

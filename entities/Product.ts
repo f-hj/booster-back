@@ -1,5 +1,7 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import slugify from 'slugify'
+import { BeforeInsert, BeforeUpdate, Column, Entity, Index, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import Brand from './Brand'
+import Image from './Image'
 import ProductModel from './ProductModel'
 import User from './User'
 
@@ -17,7 +19,6 @@ import User from './User'
  *         id:
  *           type: string
  *         brand:
- *           type: object
  *           $ref: '#/components/schemas/Brand'
  *         name:
  *           type: string
@@ -27,12 +28,24 @@ import User from './User'
  *           type: string
  *         price:
  *           type: number
+ *         models:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/ProductModel'
+ *         images:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Image'
  */
 @Entity()
 export default class Product {
 
   @PrimaryGeneratedColumn('uuid')
   public id: string
+
+  @Index()
+  @Column()
+  public slug: string
 
   @ManyToOne((type) => Brand, (brand) => brand.id)
   public brand: Brand
@@ -51,5 +64,14 @@ export default class Product {
 
   @OneToMany((type) => ProductModel, (pm) => pm.product)
   public models: ProductModel[]
+
+  @OneToMany((type) => Image, (i) => i.product)
+  public images: Image[]
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  private before() {
+    this.slug = slugify(this.name).toLowerCase()
+  }
 
 }

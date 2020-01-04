@@ -74,7 +74,6 @@ export default class BrandController {
  *         content:
  *           application/json:
  *             schema:
- *               type: object
  *               $ref: '#/components/schemas/ErrorResponse'
  */
   private async listBrands(req: express.Request, res: express.Response) {
@@ -103,7 +102,6 @@ export default class BrandController {
  *             type: object
  *             properties:
  *               brand:
- *                 type: object
  *                 $ref: '#/components/schemas/Brand'
  *     responses:
  *       200:
@@ -116,14 +114,12 @@ export default class BrandController {
  *                 success:
  *                   type: boolean
  *                 brand:
- *                   type: object
  *                   $ref: '#/components/schemas/Brand'
  *       400:
  *         description: Error
  *         content:
  *           application/json:
  *             schema:
- *               type: object
  *               $ref: '#/components/schemas/ErrorResponse'
  */
   private async createBrand(req: express.Request, res: express.Response, next: express.NextFunction) {
@@ -180,7 +176,6 @@ export default class BrandController {
  *               type: object
  *               properties:
  *                 brand:
- *                   type: object
  *                   $ref: '#/components/schemas/Brand'
  */
   private async getBrand(req: express.Request, res: express.Response) {
@@ -219,7 +214,6 @@ export default class BrandController {
  *               type: object
  *               properties:
  *                 brand:
- *                   type: object
  *                   $ref: '#/components/schemas/Brand'
  *                 logs:
  *                   type: array
@@ -272,7 +266,6 @@ private async getBrandLogs(req: express.Request, res: express.Response) {
  *             type: object
  *             properties:
  *               brand:
- *                 type: object
  *                 $ref: '#/components/schemas/Brand'
  *     responses:
  *       200:
@@ -285,7 +278,6 @@ private async getBrandLogs(req: express.Request, res: express.Response) {
  *                 success:
  *                   type: boolean
  *                 brand:
- *                   type: object
  *                   $ref: '#/components/schemas/Brand'
  */
   private async updateBrand(req: express.Request, res: express.Response) {
@@ -342,7 +334,6 @@ private async getBrandLogs(req: express.Request, res: express.Response) {
  *               type: object
  *               properties:
  *                 brand:
- *                   type: object
  *                   $ref: '#/components/schemas/Brand'
  *                 message:
  *                   type: string
@@ -478,7 +469,6 @@ private async getBrandLogs(req: express.Request, res: express.Response) {
  *         content:
  *           application/json:
  *             schema:
- *               type: object
  *               $ref: '#/components/schemas/ErrorResponse'
  */
   private async listMyBrands(req: express.Request, res: express.Response) {

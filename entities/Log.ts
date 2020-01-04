@@ -8,6 +8,7 @@ export enum Action {
   delete = 'delete',
 }
 export enum RefType {
+  image = 'image',
   user = 'user',
   brand = 'brand',
   product = 'product',
@@ -27,7 +28,6 @@ export enum RefType {
  *         date:
  *           type: string
  *         user:
- *           type: object
  *           $ref: '#/components/schemas/User'
  *         action:
  *           type: string

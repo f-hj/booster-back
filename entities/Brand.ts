@@ -1,5 +1,18 @@
 import { MinLength } from 'class-validator'
-import {Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn} from 'typeorm'
+import slugify from 'slugify'
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm'
 import User from './User'
 
 /**
@@ -25,6 +38,10 @@ export default class Brand {
   @PrimaryGeneratedColumn('uuid')
   public id: string
 
+  @Index()
+  @Column()
+  public slug: string
+
   @Column()
   @MinLength(2, {
     message: 'Name is too short',
@@ -46,6 +63,12 @@ export default class Brand {
       name: this.name,
       users: this.users ? this.users.map((user) => user.JSON()) : [],
     }
+  }
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  private before() {
+    this.slug = slugify(this.name).toLowerCase()
   }
 
 }

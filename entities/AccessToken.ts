@@ -12,7 +12,6 @@ import User from './User'
  *         createdAt:
  *           type: string
  *         user:
- *           type: object
  *           $ref: '#/components/schemas/User'
  */
 @Entity()
