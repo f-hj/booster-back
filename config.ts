@@ -16,5 +16,6 @@ export default {
     useSSL: true,
     secretKey: process.env.IMAGES_S3_SECRET || 'zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG',
     bucket: 'booster-products-images',
+    region: process.env.IMAGES_S3_REGION === '' ? null : process.env.IMAGES_S3_REGION,
   },
 }

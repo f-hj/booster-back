@@ -31,6 +31,7 @@ export default class ImagesController {
 
     this.s3 = new minio.Client({
       endPoint: config.imagesS3.endPoint,
+      region: config.imagesS3.region,
       accessKey: config.imagesS3.accessKey,
       secretKey: config.imagesS3.secretKey,
       port: config.imagesS3.port,
