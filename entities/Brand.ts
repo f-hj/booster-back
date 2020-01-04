@@ -39,7 +39,9 @@ export default class Brand {
   public id: string
 
   @Index()
-  @Column()
+  @Column({
+    default: '',
+  })
   public slug: string
 
   @Column()

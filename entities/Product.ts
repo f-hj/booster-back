@@ -44,7 +44,9 @@ export default class Product {
   public id: string
 
   @Index()
-  @Column()
+  @Column({
+    default: '',
+  })
   public slug: string
 
   @ManyToOne((type) => Brand, (brand) => brand.id)
