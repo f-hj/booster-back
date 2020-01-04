@@ -3,15 +3,21 @@ name: default
 
 steps:
 - name: restore-cache
-  pull: default
-  image: drillster/drone-volume-cache
+  image: meltwater/drone-cache
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: s3_access_key
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: s3_secret_key
+  pull: true
   settings:
-    mount:
-      - ./node_modules
+    debug: true
+    region: fr-par
     restore: true
-  volumes:
-    - name: adcca6560fdc95b3debc
-      path: /cache
+    bucket: booster-ci-cache
+    endpoint: https://s3.fr-par.scw.cloud
+    mount:
+      - 'node_modules'
 
 - name: test
   image: timbru31/java-node:latest
@@ -45,15 +51,20 @@ steps:
     status: success
 
 - name: rebuild-cache
-  pull: default
-  image: drillster/drone-volume-cache
+  image: meltwater/drone-cache
+  pull: true
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: s3_access_key
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: s3_secret_key
   settings:
-    mount:
-      - ./node_modules
     rebuild: true
-  volumes:
-    - name: adcca6560fdc95b3debc
-      path: /cache
+    region: fr-par
+    bucket: booster-ci-cache
+    endpoint: https://s3.fr-par.scw.cloud
+    mount:
+      - 'node_modules'
 
 - name: docker-push
   image: plugins/docker
