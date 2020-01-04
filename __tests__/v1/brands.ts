@@ -33,6 +33,13 @@ test('should create brand', async () => {
 
   const brand = res.data.brand!
   expect(brand.name).toBe(brandName)
+
+  const usersApi = new UsersApi({
+    accessToken: admin.token,
+  }, testhelpers.getBasePath(srv))
+
+  const uLogs = await usersApi.getUserLogs(admin.user.id)
+  expect(uLogs.data.logs).toHaveLength(1)
 })
 
 test('should create brand and be accessible', async () => {

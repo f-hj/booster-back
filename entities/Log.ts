@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Index } from 'typeorm'
 import User from './User'
 
 export enum Action {
@@ -47,6 +47,7 @@ export default class Log {
   @CreateDateColumn()
   public date: string
 
+  @Index()
   @ManyToOne((type) => User, (user) => user.id)
   public user?: User
 

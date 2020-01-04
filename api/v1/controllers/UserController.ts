@@ -30,6 +30,7 @@ export default class UserController {
     const chAT = atMw.checkAccessToken(this.c)
 
     router.get('/user/:userId', chAT, atMw.onlyAdmin(), this.getUser.bind(this))
+    router.get('/user/:userId/logs', chAT, atMw.onlyAdmin(), this.getUserLogs.bind(this))
     router.get('/users', chAT, atMw.onlyAdmin(), this.listUsers.bind(this))
     router.get('/me', chAT, this.getMyself.bind(this))
     router.post('/', this.createUser.bind(this))
@@ -191,6 +192,59 @@ private async listUsers(req: express.Request, res: express.Response) {
       logs,
     })
   }
+
+/**
+ * @swagger
+ * /v1/users/user/{userId}/logs:
+ *   get:
+ *     summary: Get what the used did
+ *     operationId: getUserLogs
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 logs:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Log'
+ */
+private async getUserLogs(req: express.Request, res: express.Response) {
+  const logs = await this.logRepo.find({
+    where: {
+      user: {
+        id: req.params.userId,
+      },
+    },
+    relations: ['user'],
+  })
+  console.log('freq', {
+    where: {
+      user: {
+        id: req.params.userId,
+      },
+    },
+    relations: ['user'],
+  })
+
+  res.json({
+    logs,
+  })
+}
 
 /**
  * @swagger
