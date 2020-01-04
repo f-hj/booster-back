@@ -232,14 +232,6 @@ private async getUserLogs(req: express.Request, res: express.Response) {
     },
     relations: ['user'],
   })
-  console.log('freq', {
-    where: {
-      user: {
-        id: req.params.userId,
-      },
-    },
-    relations: ['user'],
-  })
 
   res.json({
     logs,

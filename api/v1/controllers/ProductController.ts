@@ -112,7 +112,7 @@ private async getProductLogs(req: express.Request, res: express.Response) {
   const product = await this.repo.findOne({
     id: req.params.productId,
   }, {
-    relations: ['brand', 'models'],
+    relations: ['brand', 'models', 'images'],
   })
 
   const logs = await this.logRepo.find({

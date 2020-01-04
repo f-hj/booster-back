@@ -19,7 +19,8 @@ class StartTestHelper {
   private connection: Connection
 
   public start = async () =>  {
-    const dbPath = path.join(os.tmpdir(), `booster_sqlite_${faker.random.uuid()}.db`)
+    // tslint:disable-next-line: no-bitwise
+    const dbPath = path.join(os.tmpdir(), `booster_sqlite_${(Math.random() * 0xFFFFFF << 0).toString(16)}.db`)
     console.log('Start db to', dbPath)
     this.connection = await createConnection({
       type: 'sqlite',
