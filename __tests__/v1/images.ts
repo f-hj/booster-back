@@ -2,7 +2,7 @@
 
 import faker = require('faker')
 import net = require('net')
-import { BrandsApi, ImagesApi, ProductsApi } from '../../oa-ts-axios'
+import { BrandsApi, ImagePriorityEnum, ImagesApi, ProductsApi } from '../../oa-ts-axios'
 import testhelpers from '../../testhelpers/start'
 
 let srv: net.Server
@@ -17,7 +17,7 @@ afterAll(async () => {
   }
 })
 
-test('should create brand', async () => {
+test('should create brand, product and upload image', async () => {
   const admin = await testhelpers.createLoginAdmin(testhelpers.getBasePath(srv))
   const brandsApi = new BrandsApi({
     accessToken: admin.token,
@@ -74,4 +74,17 @@ test('should create brand', async () => {
 
   const imgp = np.data.product.images[0]
   expect(imgp.name).toBe(imgName)
+
+  const newName = faker.lorem.sentence()
+  const n = await api.updateImage(img.data.image.id, {
+    image: {
+      name: newName,
+      priority: ImagePriorityEnum.Primary,
+    },
+  })
+
+  expect(n.data.image.name).toBe(newName)
+
+  const d = await api.deleteImage(img.data.image.id)
+  expect(d.data.success).toBe(true)
 })

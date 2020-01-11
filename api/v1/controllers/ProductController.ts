@@ -9,7 +9,7 @@ import atMw from '../middlewares/accessToken'
  * @swagger
  * tags:
  *   name: Products
- *   description: Product checks
+ *   description: Products controller
  */
 
 export default class ProductController {

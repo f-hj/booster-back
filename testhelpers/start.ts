@@ -16,6 +16,8 @@ const getBasePath = (server: net.Server) => {
 
 class StartTestHelper {
 
+  public getBasePath = getBasePath
+
   private connection: Connection
 
   public start = async () =>  {
@@ -72,7 +74,6 @@ class StartTestHelper {
 
     return login.data
   }
-  public getBasePath = getBasePath
 }
 
 export default new StartTestHelper()

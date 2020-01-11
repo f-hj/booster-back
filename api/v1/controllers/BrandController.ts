@@ -361,14 +361,14 @@ private async getBrandLogs(req: express.Request, res: express.Response) {
       // TODO: send mail to user with invite link
       console.log('ONBOARDING USER: ' + onb.id)
 
-      const log = this.logRepo.create({
+      const createOnboardLog = this.logRepo.create({
         action: Action.create,
         refType: RefType.onboardingUser,
         refId: onb.id,
         user: req.context?.user,
         to: onb,
       } as Log)
-      await this.logRepo.save(log)
+      await this.logRepo.save(createOnboardLog)
 
       res.json({
         message: 'onboarding sent',

@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "start": "ts-node index.ts",
+    "lint": "tslint -c tslint.json api/**/*.ts entities/**/*.ts __tests__/**/*.ts testhelpers/**/*.ts",
     "test": "jest",
     "pushCoverage": "cat ./coverage/lcov.info | codacy-coverage",
     "buildMappings": "swagger-jsdoc -d swagger.config.js api/v1/controllers/* api/v1/entities/* entities/*",

@@ -1,7 +1,6 @@
 import bcrypt = require('bcrypt')
 import { IsEmail, MinLength } from 'class-validator'
-import { Column, Entity, PrimaryGeneratedColumn, OneToMany, ManyToMany, JoinTable, CreateDateColumn, ManyToOne } from 'typeorm'
-import AccessToken from './AccessToken'
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm'
 import Brand from './Brand'
 
 /**

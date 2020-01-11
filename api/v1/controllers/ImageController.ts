@@ -6,6 +6,7 @@ import config from '../../../config'
 import Image from '../../../entities/Image'
 import Log, { Action, RefType } from '../../../entities/Log'
 import Product from '../../../entities/Product'
+import atMw from '../middlewares/accessToken'
 
 /**
  * @swagger
@@ -42,35 +43,40 @@ export default class ImagesController {
   public router() {
     const router = express.Router({ mergeParams: true })
 
+    const chAT = atMw.checkAccessToken(this.c)
+
     router.get('/image/:imageId', this.getImage.bind(this))
-    router.post('/product/:productId', this.productImageUpload.bind(this))
+    router.post('/product/:productId', chAT, this.productImageUpload.bind(this))
+    router.delete('/image/:imageId', chAT, this.deleteImage.bind(this))
+    router.patch('/image/:imageId', chAT, this.updateImage.bind(this))
 
     return router
   }
 
-/**
- * @swagger
- * /v1/images/image/${imageId}:
- *  get:
- *    summary: Get an image from id
- *    operationId: getImage
- *    tags:
- *      - Images
- *    parameters:
- *      - in: path
- *        name: imageId
- *        schema:
- *          type: string
- *        required: true
- *        description: Image ID
- *    responses:
- *      200:
- *        description: Image
- */
+  /**
+   * @swagger
+   * /v1/images/image/${imageId}:
+   *  get:
+   *    summary: Get an image from id
+   *    operationId: getImage
+   *    tags:
+   *      - Images
+   *    parameters:
+   *      - in: path
+   *        name: imageId
+   *        schema:
+   *          type: string
+   *        required: true
+   *        description: Image ID
+   *    responses:
+   *      200:
+   *        description: Image
+   */
   private async getImage(req: express.Request, res: express.Response, next: express.NextFunction) {
     const image = await this.repo.findOneOrFail({
       id: req.params.imageId,
     })
+    res.set('Cache-Control', 'max-age=2628000, public')
     res.type(image.type)
     const exten = extension(image.type)
 
@@ -83,45 +89,47 @@ export default class ImagesController {
     })
   }
 
-/**
- * @swagger
- * /v1/images/product/${productId}:
- *   post:
- *     summary: Post an image for a product
- *     operationId: productImageUpload
- *     tags:
- *       - Images
- *     parameters:
- *       - in: path
- *         name: productId
- *         schema:
- *           type: string
- *         required: true
- *         description: Product ID
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: Display name
- *               content:
- *                 type: string
- *                 description:
- *                   "Base64 encoded image with header (eg: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEU...')"
- *     responses:
- *       200:
- *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 image:
- *                   $ref: '#/components/schemas/Image'
- */
+  /**
+   * @swagger
+   * /v1/images/product/${productId}:
+   *   post:
+   *     summary: Post an image for a product
+   *     operationId: productImageUpload
+   *     security:
+   *       - bearerAuth: []
+   *     tags:
+   *       - Images
+   *     parameters:
+   *       - in: path
+   *         name: productId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: Product ID
+   *     requestBody:
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               name:
+   *                 type: string
+   *                 description: Display name
+   *               content:
+   *                 type: string
+   *                 description:
+   *                   "Base64 encoded image with header (eg: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEU...')"
+   *     responses:
+   *       200:
+   *         description: Success
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 image:
+   *                   $ref: '#/components/schemas/Image'
+   */
   private async productImageUpload(req: express.Request, res: express.Response, next: express.NextFunction) {
     const product = await this.productRepo.findOneOrFail({
       id: req.params.productId,
@@ -167,6 +175,103 @@ export default class ImagesController {
     return res.json({
       image,
     })
+  }
+
+  /**
+   * @swagger
+   * /v1/images/image/${imageId}:
+   *  delete:
+   *    summary: Delete an image from id
+   *    operationId: deleteImage
+   *    security:
+   *       - bearerAuth: []
+   *    tags:
+   *      - Images
+   *    parameters:
+   *      - in: path
+   *        name: imageId
+   *        schema:
+   *          type: string
+   *        required: true
+   *        description: Image ID
+   *    responses:
+   *      200:
+   *        description: Success
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                success:
+   *                  type: boolean
+   */
+  private async deleteImage(req: express.Request, res: express.Response, next: express.NextFunction) {
+    // TODO: check accesses
+    const image = await this.repo.findOneOrFail({
+      id: req.params.imageId,
+    })
+
+    await this.repo.delete(image)
+
+    res.json({
+      success: true,
+    })
+  }
+
+  /**
+   * @swagger
+   * /v1/images/image/${imageId}:
+   *  patch:
+   *    summary: Update an image from id
+   *    operationId: updateImage
+   *    security:
+   *       - bearerAuth: []
+   *    tags:
+   *      - Images
+   *    parameters:
+   *      - in: path
+   *        name: imageId
+   *        schema:
+   *          type: string
+   *        required: true
+   *        description: Image ID
+   *    requestBody:
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               image:
+   *                 $ref: '#/components/schemas/Image'
+   *    responses:
+   *      200:
+   *        description: Success
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                image:
+   *                  $ref: '#/components/schemas/Image'
+   */
+  private async updateImage(req: express.Request, res: express.Response, next: express.NextFunction) {
+    // TODO: check accesses
+    const image = this.repo.create(req.body.image as Image)
+    image.id = req.params.imageId
+
+    await this.repo.save(image)
+    res.json({
+      image,
+    })
+
+    const log = this.logRepo.create({
+      action: Action.update,
+      refType: RefType.image,
+      refId: image.id,
+      user: req.context?.user,
+      to: image,
+    } as Log)
+    await this.logRepo.save(log)
   }
 
 }

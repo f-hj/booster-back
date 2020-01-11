@@ -19,6 +19,12 @@ steps:
     mount:
       - 'node_modules'
 
+- name: lint
+  image: node:12
+  failure: ignore
+  commands:
+    - yarn lint
+
 - name: test
   image: timbru31/java-node:latest
   environment:
@@ -100,3 +106,19 @@ steps:
     branch: master
     event: push
     status: success
+
+- name: slack-hook
+  image: plugins/slack
+  settings:
+    webhook:
+      from_secret: slack_webhook
+    channel: tech-stream
+    template: >
+      {{#success build.status}}
+        New deployment for {{ repo.name }} by {{ build.author }}.
+      {{else}}
+        build {{build.number}} failed. Fix me please.
+      {{/success}}
+  when:
+    branch: master
+    event: push

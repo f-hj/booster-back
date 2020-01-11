@@ -2,6 +2,12 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import Product from './Product'
 import ProductModel from './ProductModel'
 
+enum ImagePriority {
+  None = 'none',
+  Primary = 'primary',
+  Secondary = 'secondary',
+}
+
 /**
  * @swagger
  * components:
@@ -20,6 +26,10 @@ import ProductModel from './ProductModel'
  *           $ref: '#/components/schemas/Product'
  *         model:
  *           $ref: '#/components/schemas/ProductModel'
+ *         priority:
+ *           type: string
+ *           description: Type of the image for the product
+ *           enum: [none, primary, secondary]
  */
 @Entity()
 export default class Image {
@@ -37,4 +47,9 @@ export default class Image {
 
   @ManyToOne((type) => ProductModel, (p) => p.images)
   public model?: ProductModel
+
+  @Column({
+    default: ImagePriority.None,
+  })
+  public priority: ImagePriority
 }
